@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - WebComb</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        .custom-dark-bg {
+            background: radial-gradient(125% 125% at 50% 10%, #000 40%, #63e 100%);
+        }
+
+        .custom-light-bg {
+            background: radial-gradient(125% 125% at 50% 10%, #fff 40%, #63e 100%);
+            background-color: white;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 2.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(150, 150, 150, 0.3);
+            background-color: transparent;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            box-shadow: 0 0 0 2px rgba(100, 100, 100, 0.5);
+            border-color: transparent;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(150, 150, 150, 0.3);
+            background-color: transparent;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-textarea:focus {
+            box-shadow: 0 0 0 2px rgba(100, 100, 100, 0.5);
+            border-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="relative min-h-screen w-full overflow-hidden text-zinc-900 transition-colors duration-300">
+
+    <!-- Swipe Transition Overlay -->
+    <div id="swipe-overlay"
+        class="fixed inset-0 z-[100] bg-zinc-950 translate-x-0 transition-transform duration-500 ease-in-out"></div>
+
+    <!-- Dynamic Background Element -->
+    <div id="bg-layer" class="absolute inset-0 -z-10 size-full custom-dark-bg transition-colors duration-500"></div>
+
+    <!-- Theme Toggle Fixed Top-Right -->
+    <div class="fixed top-4 right-4 z-50">
+        <div id="theme-toggle"
+            class="flex w-14 h-7 sm:w-16 sm:h-8 p-1 rounded-full cursor-pointer transition-all duration-300 bg-zinc-950 border border-zinc-800"
+            role="button" tabindex="0">
+            <div class="flex justify-between items-center w-full relative">
+                <div id="circle-left"
+                    class="flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 transform translate-x-0 bg-zinc-800 absolute left-0">
+                    <i id="icon-left" data-lucide="moon" class="w-3 h-3 sm:w-4 sm:h-4 text-white" stroke-width="1.5"></i>
+                </div>
+                <div id="circle-right"
+                    class="flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 bg-transparent absolute right-0">
+                    <i id="icon-right" data-lucide="sun" class="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" stroke-width="1.5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Logo Top Left -->
+    <div class="fixed top-4 left-4 sm:top-6 sm:left-6 z-50">
+        <a href="index.html">
+            <img src="img/webComb.png" alt="WebComb Logo"
+                class="h-8 sm:h-10 w-auto object-contain hover:opacity-80 transition-opacity">
+        </a>
+    </div>
+
+    <!-- Main Contact Content -->
+    <div class="relative z-10 w-full h-screen overflow-y-auto px-4 py-24 sm:py-20 flex items-start sm:items-center justify-center">
+        <div class="container max-w-screen-xl mx-auto pt-4 sm:pt-0">
+            <div class="flex flex-col justify-between gap-10 lg:flex-row lg:gap-20">
+                <!-- Left Details -->
+                <div class="mx-auto flex max-w-sm flex-col justify-between gap-10">
+                    <div class="text-center lg:text-left pt-6">
+                        <h1
+                            class="mb-2 text-4xl sm:text-5xl font-semibold lg:mb-4 lg:text-6xl tracking-tight text-black dark:text-white">
+                            Contact Us</h1>
+                        <p class="text-zinc-600 dark:text-zinc-300 text-lg">We are available for questions, feedback, or
+                            collaboration opportunities. Let us know how we can help!</p>
+                    </div>
+                    <div class="mx-auto w-fit lg:mx-0">
+                        <h3 class="mb-4 text-center text-2xl font-semibold lg:text-left text-black dark:text-white">
+                            Contact Details</h3>
+                        <ul class="ml-1 space-y-4 list-none text-zinc-800 dark:text-zinc-200">
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="mail" class="w-5 h-5 opacity-70"></i>
+                                <span><span class="font-semibold opacity-70">Email: </span> <a
+                                        href="mailto:contact@webcomb.net"
+                                        class="underline hover:opacity-80 transition-opacity">contact@webcomb.net</a></span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="globe" class="w-5 h-5 opacity-70"></i>
+                                <span><span class="font-semibold opacity-70">Web: </span> <a href="https://webcomb.net"
+                                        target="_blank" rel="noopener noreferrer"
+                                        class="underline hover:opacity-80 transition-opacity">WebComb.net</a></span>
+                            </li>
+                        </ul>
+                        <div class="mt-10 mb-6 sm:mb-0 pt-6 text-sm text-zinc-500 dark:text-zinc-400">
+                            &copy; 2026 WebComb. Built with precision. All rights reserved.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Form Box -->
+                <div
+                    class="mx-auto flex w-full max-w-screen-md flex-col gap-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-black/40 backdrop-blur-xl p-6 sm:p-10 shadow-xl mb-12 lg:mb-0">
+                    <div class="flex gap-4 flex-col sm:flex-row">
+                        <div class="grid w-full items-center gap-1.5">
+                            <label for="firstname"
+                                class="text-sm font-semibold leading-none text-black dark:text-white">First Name</label>
+                            <input type="text" id="firstname" placeholder="First Name"
+                                class="form-input text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500" />
+                        </div>
+                        <div class="grid w-full items-center gap-1.5">
+                            <label for="lastname"
+                                class="text-sm font-semibold leading-none text-black dark:text-white">Last Name</label>
+                            <input type="text" id="lastname" placeholder="Last Name"
+                                class="form-input text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500" />
+                        </div>
+                    </div>
+                    <div class="grid w-full items-center gap-1.5">
+                        <label for="email"
+                            class="text-sm font-semibold leading-none text-black dark:text-white">Email</label>
+                        <input type="email" id="email" placeholder="Email"
+                            class="form-input text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500" />
+                    </div>
+                    <div class="grid w-full items-center gap-1.5">
+                        <label for="subject"
+                            class="text-sm font-semibold leading-none text-black dark:text-white">Subject</label>
+                        <input type="text" id="subject" placeholder="Subject"
+                            class="form-input text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500" />
+                    </div>
+                    <div class="grid w-full gap-1.5">
+                        <label for="message"
+                            class="text-sm font-semibold leading-none text-black dark:text-white">Message</label>
+                        <textarea id="message" placeholder="Type your message here."
+                            class="form-textarea text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500"></textarea>
+                    </div>
+                    <button id="submit-btn"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors focus-visible:outline-none disabled:opacity-50 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 h-11 px-8 w-full mt-2 shadow-sm">
+                        Send Message
+                    </button>
+
+                    <div class="flex justify-center w-full mt-2">
+                        <button id="back-btn"
+                            class="group relative inline-flex items-center justify-center gap-2 rounded-full border border-black/10 dark:border-white/10 bg-white/20 dark:bg-black/20 px-5 text-sm font-semibold tracking-wide text-zinc-900 dark:text-zinc-50 backdrop-blur-md transition-all overflow-hidden cursor-pointer shadow-sm hover:shadow"
+                            style="min-width: 130px; height: 44px;">
+                            <i data-lucide="arrow-left"
+                                class="relative z-10 w-4 h-4 transition-all duration-300 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-1"></i>
+                            <span class="relative z-10 transition-transform duration-300 group-hover:translate-x-2">Go
+                                Back</span>
+                            <div
+                                class="absolute inset-0 -z-10 bg-white/60 dark:bg-zinc-800/80 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                            </div>
+                            <div
+                                class="absolute left-4 flex gap-1 transition-all duration-300 group-hover:-translate-x-8 group-hover:opacity-0 items-center justify-center h-full">
+                                <div class="h-1.5 w-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600"></div>
+                                <div class="h-1.5 w-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></div>
+                                <div class="h-1.5 w-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // Check local storage for theme persistence, or default dark
+        let isDark = localStorage.getItem('theme') === 'dark';
+
+        const toggle = document.getElementById('theme-toggle');
+        const bgLayer = document.getElementById('bg-layer');
+        const circleLeft = document.getElementById('circle-left');
+        const circleRight = document.getElementById('circle-right');
+        const iconLeft = document.getElementById('icon-left');
+        const iconRight = document.getElementById('icon-right');
+        const swipeOverlay = document.getElementById('swipe-overlay');
+
+        function renderTheme() {
+            // Persist theme choice across pages
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+            toggle.className = `flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 ${isDark ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border border-zinc-200'}`;
+            bgLayer.className = `absolute inset-0 -z-10 size-full transition-colors duration-500 ${isDark ? 'custom-dark-bg' : 'custom-light-bg'}`;
+
+            // Adjust overlay background cleanly
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                swipeOverlay.classList.remove('bg-white');
+                swipeOverlay.classList.add('bg-zinc-950');
+            } else {
+                document.documentElement.classList.remove('dark');
+                swipeOverlay.classList.remove('bg-zinc-950');
+                swipeOverlay.classList.add('bg-white');
+            }
+
+            circleLeft.className = `flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 absolute left-0 ${isDark ? 'transform translate-x-0 bg-zinc-800' : 'transform translate-x-7 sm:translate-x-8 bg-gray-200'}`;
+            circleRight.className = `flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 absolute right-0 ${isDark ? 'bg-transparent' : 'transform -translate-x-7 sm:-translate-x-8'}`;
+
+            iconLeft.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+            iconLeft.className = `w-3 h-3 sm:w-4 sm:h-4 ${isDark ? 'text-white' : 'text-gray-700'}`;
+            iconRight.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            iconRight.className = `w-3 h-3 sm:w-4 sm:h-4 ${isDark ? 'text-gray-500' : 'text-black'}`;
+
+            lucide.createIcons();
+        }
+
+        toggle.addEventListener('click', () => { isDark = !isDark; renderTheme(); });
+        renderTheme();
+
+        // Reveal page on load (swipe away to the left)
+        setTimeout(() => {
+            swipeOverlay.classList.replace('translate-x-0', '-translate-x-full');
+        }, 50);
+
+        // Back button navigation
+        document.getElementById('back-btn').addEventListener('click', () => {
+            // Block sweeps back from the left to cover the screen
+            swipeOverlay.classList.remove('transition-transform', 'duration-500', '-translate-x-full');
+            swipeOverlay.classList.add('-translate-x-full');
+
+            void swipeOverlay.offsetWidth; // flush CSS
+
+            swipeOverlay.classList.add('transition-transform', 'duration-500');
+            swipeOverlay.classList.replace('-translate-x-full', 'translate-x-0');
+
+            setTimeout(() => { window.location.href = 'index.html?back=true'; }, 500);
+        });
+
+        // --- FORM SUBMISSION LOGIC (EmailJS) ---
+        // Initialize EmailJS (Uncomment and add your public key when ready)
+        emailjs.init({ publicKey: "4aEEp_tjVfzqgEn_1" });
+
+        const submitBtn = document.getElementById('submit-btn');
+
+        submitBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstname').value.trim();
+            const lastName = document.getElementById('lastname').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!firstName || !email || !message) {
+                alert("Please fill in your first name, email, and message.");
+                return;
+            }
+
+            const fullName = `${firstName} ${lastName}`.trim();
+            
+            // XSS Prevention: Basic escaping of input values before sending
+            const sanitize = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            
+            // UI Loading state
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Sending...";
+            submitBtn.disabled = true;
+
+            try {
+                const templateParams = {
+                    customer_name: sanitize(fullName),
+                    customer_email: sanitize(email),
+                    message: sanitize(message)
+                };
+
+                // 1. Send to Team template
+                await emailjs.send('service_9be77in', 'template_j9bsew8', templateParams);
+
+                // 2. Send to Customer template
+                await emailjs.send('service_9be77in', 'template_ci9066r', templateParams);
+
+                // Success UI State
+                submitBtn.innerText = "Message Sent!";
+                submitBtn.classList.replace('bg-zinc-900', 'bg-green-600');
+                submitBtn.classList.replace('dark:bg-zinc-100', 'dark:bg-green-500');
+                submitBtn.classList.replace('text-zinc-900', 'text-white');
+
+                // Clear Form
+                document.getElementById('firstname').value = '';
+                document.getElementById('lastname').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('subject').value = '';
+                document.getElementById('message').value = '';
+
+                // Reset Button after 3 seconds
+                setTimeout(() => {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.className = "inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors focus-visible:outline-none disabled:opacity-50 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 h-11 px-8 w-full mt-2 shadow-sm";
+                }, 3000);
+
+            } catch (error) {
+                console.error('FAILED...', error);
+                submitBtn.innerText = "Failed to Send";
+                submitBtn.classList.replace('bg-zinc-900', 'bg-red-600');
+                submitBtn.classList.replace('dark:bg-zinc-100', 'dark:bg-red-500');
+
+                setTimeout(() => {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.className = "inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors focus-visible:outline-none disabled:opacity-50 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 h-11 px-8 w-full mt-2 shadow-sm";
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+
+</html>
