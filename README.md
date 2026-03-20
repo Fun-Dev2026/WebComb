@@ -44,5 +44,10 @@ WebComb is a premium, high-performance static website designed for modern digita
 - External links use `rel="noopener noreferrer"` for protection against tabnabbing.
 - Responsive scaling ensures UI stability across viewport transitions.
 
+## 📩 Conatct US
+- email: contact@webcomb.net
+
+---
+Built with AI-assisted workflows and 21st.dev components.
 ---
 Built with precision by WebComb. All rights reserved &copy; 2026.
