@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebComb</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-dark-bg { 
+            background: radial-gradient(125% 125% at 50% 10%, #000 40%, #63e 100%); 
+        }
+        .custom-light-bg { 
+            background: radial-gradient(125% 125% at 50% 10%, #fff 40%, #63e 100%); 
+            background-color: white; 
+        }
+
+        /* Smooth Page Transitions replaced by Swipe Overlay elements natively */
+
+        /* Title text gradient */
+        .title-gradient-dark {
+            background-image: linear-gradient(to right, white, rgba(255,255,255,0.8));
+        }
+        .title-gradient-light {
+            background-image: linear-gradient(to right, #171717, rgba(82,82,82,0.8));
+        }
+
+        /* Scramble placeholder block for monospace layout stability if needed */
+        .scramble-block { min-height: 1.2em; display: inline-block; }
+    </style>
+</head>
+<body class="relative min-h-screen w-full overflow-x-hidden overflow-y-auto text-zinc-900 transition-colors duration-300">
+    
+    <!-- Company Logo Top Left -->
+    <div class="fixed top-4 left-4 sm:top-6 sm:left-6 z-50">
+        <a href="index.html">
+            <img src="webComb.png" alt="WebComb Logo" class="h-8 sm:h-10 w-auto object-contain hover:opacity-80 transition-opacity">
+        </a>
+    </div>
+
+    <!-- Swipe Transition Overlay -->
+    <div id="swipe-overlay" class="fixed inset-0 z-[100] bg-zinc-950 translate-x-full transition-transform duration-500 ease-in-out"></div>
+
+    <!-- Dynamic Background Element -->
+    <div id="bg-layer" class="absolute inset-0 -z-10 size-full custom-dark-bg transition-colors duration-500"></div>
+
+    <!-- Interactive Wave Overlay (Layer 2) -->
+    <canvas id="waves-canvas" class="absolute inset-0 z-0 pointer-events-none opacity-40"></canvas>
+
+    <!-- Theme Toggle Fixed Top-Right -->
+    <div class="fixed top-4 right-4 z-50">
+        <div id="theme-toggle" class="flex w-14 h-7 sm:w-16 sm:h-8 p-1 rounded-full cursor-pointer transition-all duration-300 bg-zinc-950 border border-zinc-800" role="button" tabindex="0">
+            <div class="flex justify-between items-center w-full relative">
+                <div id="circle-left" class="flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 transform translate-x-0 bg-zinc-800 absolute left-0">
+                    <i id="icon-left" data-lucide="moon" class="w-3 h-3 sm:w-4 sm:h-4 text-white" stroke-width="1.5"></i>
+                </div>
+                <div id="circle-right" class="flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 bg-transparent absolute right-0">
+                    <i id="icon-right" data-lucide="sun" class="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" stroke-width="1.5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 container mx-auto px-4 md:px-6 h-screen flex flex-col justify-center text-center">
+        <div class="max-w-4xl mx-auto flex flex-col items-center">
+            
+            <!-- Scramble Texts Section -->
+            <h1 class="text-2xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tighter flex flex-col items-center min-h-[3em] sm:min-h-[2em] justify-center px-4">
+                <span id="looping-scramble-target" class="text-center text-transparent bg-clip-text title-gradient-dark transition-all duration-300 inline-block"></span>
+            </h1>
+
+            <!-- Interactive Hover Button (CTA) -->
+            <div class="mt-8 inline-block group relative p-px rounded-full backdrop-blur-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <button id="cta-btn" class="group relative w-44 h-14 cursor-pointer overflow-hidden rounded-full border border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-black/90 p-2 text-center font-semibold text-lg text-black dark:text-white transition-all duration-300 hover:shadow-md">
+                    <span class="inline-block translate-x-1 transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0">Contact Us</span>
+                    <div class="absolute top-0 left-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-white dark:text-black opacity-0 transition-all duration-300 group-hover:-translate-x-0 group-hover:opacity-100">
+                        <span>Contact Us</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </div>
+                    <!-- The expanding circle for hover fill effect -->
+                    <div class="absolute left-[20%] top-[40%] h-2 w-2 scale-[1] rounded-lg bg-black dark:bg-white transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[3]"></div>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. THEME LOGIC ---
+        let isDark = localStorage.getItem('theme') === 'dark';
+        
+        const toggle = document.getElementById('theme-toggle');
+        const bgLayer = document.getElementById('bg-layer');
+        const circleLeft = document.getElementById('circle-left');
+        const circleRight = document.getElementById('circle-right');
+        const iconLeft = document.getElementById('icon-left');
+        const iconRight = document.getElementById('icon-right');
+
+        function renderTheme() {
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+            // Container classes
+            toggle.className = `flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 ${isDark ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border border-zinc-200'}`;
+            
+            // Background classes 
+            bgLayer.className = `absolute inset-0 -z-10 size-full transition-colors duration-500 ${isDark ? 'custom-dark-bg' : 'custom-light-bg'}`;
+            
+            document.body.className = `relative h-screen w-full overflow-hidden transition-colors duration-300 ${isDark ? 'text-zinc-50' : 'text-zinc-900'}`;
+
+            const swipeOverlay = document.getElementById('swipe-overlay');
+            if (isDark) {
+                swipeOverlay.classList.remove('bg-white');
+                swipeOverlay.classList.add('bg-zinc-950');
+            } else {
+                swipeOverlay.classList.remove('bg-zinc-950');
+                swipeOverlay.classList.add('bg-white');
+            }
+
+            // Toggle Text Gradient Classes
+            const target = document.getElementById('looping-scramble-target');
+            if (target) {
+                target.classList.remove('title-gradient-dark', 'title-gradient-light');
+                target.classList.add(isDark ? 'title-gradient-dark' : 'title-gradient-light');
+            }
+
+            // Toggle HTML dark class for button styling pseudo-selectors (Tailwind dark mode fallback if using 'dark:')
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // Circles logic exact to React component
+            circleLeft.className = `flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 absolute left-0 ${isDark ? 'transform translate-x-0 bg-zinc-800' : 'transform translate-x-7 sm:translate-x-8 bg-gray-200'}`;
+            circleRight.className = `flex justify-center items-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-transform duration-300 absolute right-0 ${isDark ? 'bg-transparent' : 'transform -translate-x-7 sm:-translate-x-8'}`;
+
+            iconLeft.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+            iconLeft.className = `w-3 h-3 sm:w-4 sm:h-4 ${isDark ? 'text-white' : 'text-gray-700'}`;
+            
+            iconRight.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            iconRight.className = `w-3 h-3 sm:w-4 sm:h-4 ${isDark ? 'text-gray-500' : 'text-black'}`;
+            
+            
+            // Adjust wave color based on theme
+            if (window.waveSystem) {
+                window.waveSystem.setTheme(isDark);
+            }
+
+            lucide.createIcons();
+        }
+
+        toggle.addEventListener('click', () => { isDark = !isDark; renderTheme(); });
+        toggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isDark = !isDark; renderTheme(); }
+        });
+        
+        // Initial Theme Paint
+        renderTheme();
+
+        const phrases = [
+            'Hello, welcome to WebComb!',
+            'We Design',
+            'We Build',
+            'We Launch',
+            'We Optimize',
+            'We Scale'
+        ];
+
+        const targetEl = document.getElementById('looping-scramble-target');
+
+        // --- 3. TEXT SCRAMBLE LOGIC (text2.txt) ---
+        class TextScramble2 {
+            constructor(el, dictChars = '!<>-_\\/[]{}—=+*^?#________', dudClass = 'opacity-40') {
+                this.el = el;
+                this.chars = dictChars;
+                this.dudClass = dudClass;
+                this.queue = [];
+                this.frame = 0;
+                this.frameRequest = null;
+            }
+
+            setText(newText) {
+                const oldText = this.el.innerText || '';
+                const length = Math.max(oldText.length, newText.length);
+                return new Promise(resolve => {
+                    this.queue = [];
+                    for (let i = 0; i < length; i++) {
+                        const from = oldText[i] || '';
+                        const to = newText[i] || '';
+                        const start = Math.floor(Math.random() * 40);
+                        const end = start + Math.floor(Math.random() * 40);
+                        this.queue.push({ from, to, start, end });
+                    }
+
+                    if (this.frameRequest) cancelAnimationFrame(this.frameRequest);
+                    this.frame = 0;
+                    
+                    const step = () => {
+                        let output = '';
+                        let complete = 0;
+                        
+                        for (let i = 0; i < this.queue.length; i++) {
+                            let { from, to, start, end, char } = this.queue[i];
+                            if (this.frame >= end) {
+                                complete++;
+                                output += to;
+                            } else if (this.frame >= start) {
+                                if (!char || Math.random() < 0.28) {
+                                    char = this.randomChar();
+                                    this.queue[i].char = char;
+                                }
+                                output += `<span class="${this.dudClass}">${this.escapeHtml(char)}</span>`;
+                            } else {
+                                output += this.escapeHtml(from);
+                            }
+                        }
+                        
+                        this.el.innerHTML = output;
+                        
+                        if (complete === this.queue.length) {
+                            resolve();
+                        } else {
+                            this.frame++;
+                            this.frameRequest = requestAnimationFrame(step);
+                        }
+                    };
+                    
+                    this.frameRequest = requestAnimationFrame(step);
+                });
+            }
+
+            randomChar() {
+                return this.chars[Math.floor(Math.random() * this.chars.length)];
+            }
+
+            escapeHtml(str) {
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            }
+        }
+
+        const scrambler2 = new TextScramble2(targetEl);
+        let phraseIndex2 = 0;
+        
+        async function loopScramble2() {
+            while(true) {
+                await scrambler2.setText(phrases[phraseIndex2]);
+                await new Promise(r => setTimeout(r, 2000)); // wait 2s
+                phraseIndex2 = (phraseIndex2 + 1) % phrases.length;
+            }
+        }
+        
+        loopScramble2();
+
+        // --- 4. INTERACTIVE WAVES LOGIC (Interactive.txt converted to Vanilla JS) ---
+        class Noise {
+            constructor(seed) {
+                this.p = new Uint8Array(512);
+                this.seed = seed > 0 && seed < 1 ? seed : Math.random();
+                this.grad3 = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1]];
+                this.init(this.seed);
+            }
+            init(seed) {
+                let p = new Uint8Array(256);
+                for (let i = 0; i < 256; i++) p[i] = i;
+                for (let i = 0; i < 256; i++) {
+                    let j = Math.floor(seed * (i + 1)) % 256;
+                    let k = p[i]; p[i] = p[j]; p[j] = k;
+                }
+                for (let i = 0; i < 512; i++) this.p[i] = p[i & 255];
+            }
+            dot(g, x, y) { return g[0] * x + g[1] * y; }
+            perlin2(x, y) {
+                let X = Math.floor(x) & 255; let Y = Math.floor(y) & 255;
+                x -= Math.floor(x); y -= Math.floor(y);
+                let fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+                let u = fade(x); let v = fade(y);
+                let p = this.p;
+                let n00 = this.dot(this.grad3[p[X + p[Y]] % 12], x, y);
+                let n01 = this.dot(this.grad3[p[X + p[Y + 1]] % 12], x, y - 1);
+                let n10 = this.dot(this.grad3[p[X + 1 + p[Y]] % 12], x - 1, y);
+                let n11 = this.dot(this.grad3[p[X + 1 + p[Y + 1]] % 12], x - 1, y - 1);
+                let lerp = (a, b, x) => a + x * (b - a);
+                return lerp(lerp(n00, n10, u), lerp(n01, n11, u), v);
+            }
+        }
+
+        const waveConfig = {
+            GRID_X_GAP: window.innerWidth < 768 ? 20 : 12, 
+            GRID_Y_GAP: window.innerWidth < 768 ? 50 : 38,
+            WAVE_TIME_X_FACTOR: 0.0125, WAVE_NOISE_X_FACTOR: 0.002,
+            WAVE_TIME_Y_FACTOR: 0.005, WAVE_NOISE_Y_FACTOR: 0.0015,
+            WAVE_NOISE_MAGNITUDE: 12, WAVE_AMPLITUDE_X: 32, WAVE_AMPLITUDE_Y: 16,
+            MOUSE_INFLUENCE_RADIUS: 200, MOUSE_FORCE_FACTOR: 0.00065,
+            TENSION_STRENGTH: 0.005, FRICTION: 0.925,
+            CURSOR_DISPLACEMENT_STRENGTH: 2, MAX_CURSOR_DISPLACEMENT: 100
+        };
+
+        class WaveSystem {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.mouse = { x: -1000, y: -1000, sx: 0, sy: 0, lx: 0, ly: 0, v: 0, vs: 0, a: 0 };
+                this.lines = [];
+                this.noise = new Noise(Math.random());
+                this.lineColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+                
+                this.init();
+                this.animate = this.animate.bind(this);
+                requestAnimationFrame(this.animate);
+            }
+
+            setTheme(isDark) {
+                this.lineColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+            }
+
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => {
+                    waveConfig.GRID_X_GAP = window.innerWidth < 768 ? 20 : 12;
+                    waveConfig.GRID_Y_GAP = window.innerWidth < 768 ? 50 : 38;
+                    this.resize();
+                });
+                const handlePointer = (x, y) => {
+                    this.mouse.x = x;
+                    this.mouse.y = y;
+                };
+                window.addEventListener('mousemove', (e) => handlePointer(e.clientX, e.clientY));
+                window.addEventListener('touchstart', (e) => handlePointer(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+                window.addEventListener('touchmove', (e) => handlePointer(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.createLines();
+            }
+
+            createLines() {
+                this.lines = [];
+                const totalLines = Math.ceil(this.canvas.width / waveConfig.GRID_X_GAP) + 2;
+                const totalPoints = Math.ceil(this.canvas.height / waveConfig.GRID_Y_GAP) + 2;
+                for (let i = 0; i <= totalLines; i++) {
+                    const points = [];
+                    for (let j = 0; j <= totalPoints; j++) {
+                        points.push({
+                            x: i * waveConfig.GRID_X_GAP,
+                            y: j * waveConfig.GRID_Y_GAP,
+                            wave: { x: 0, y: 0 },
+                            cursor: { x: 0, y: 0, vx: 0, vy: 0 }
+                        });
+                    }
+                    this.lines.push(points);
+                }
+            }
+
+            animate(time) {
+                const { mouse } = this;
+                mouse.sx += (mouse.x - mouse.sx) * 0.1;
+                mouse.sy += (mouse.y - mouse.sy) * 0.1;
+                const dx = mouse.sx - mouse.lx;
+                const dy = mouse.sy - mouse.ly;
+                mouse.vs += (Math.hypot(dx, dy) - mouse.vs) * 0.1;
+                mouse.a = Math.atan2(dy, dx);
+                mouse.lx = mouse.sx; mouse.ly = mouse.sy;
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = this.lineColor;
+                this.ctx.lineWidth = 0.6;
+
+                this.lines.forEach(points => {
+                    points.forEach(p => {
+                        const nx = (p.x + time * waveConfig.WAVE_TIME_X_FACTOR) * waveConfig.WAVE_NOISE_X_FACTOR;
+                        const ny = (p.y + time * waveConfig.WAVE_TIME_Y_FACTOR) * waveConfig.WAVE_NOISE_Y_FACTOR;
+                        const move = this.noise.perlin2(nx, ny) * waveConfig.WAVE_NOISE_MAGNITUDE;
+                        p.wave.x = Math.cos(move) * waveConfig.WAVE_AMPLITUDE_X;
+                        p.wave.y = Math.sin(move) * waveConfig.WAVE_AMPLITUDE_Y;
+
+                        const mdx = p.x - mouse.sx;
+                        const mdy = p.y - mouse.sy;
+                        const md = Math.hypot(mdx, mdy);
+                        const radius = Math.max(waveConfig.MOUSE_INFLUENCE_RADIUS, mouse.vs);
+                        if (md < radius) {
+                            const f = (1 - md / radius) * radius * mouse.vs * waveConfig.MOUSE_FORCE_FACTOR;
+                            p.cursor.vx += Math.cos(mouse.a) * f;
+                            p.cursor.vy += Math.sin(mouse.a) * f;
+                        }
+                        p.cursor.vx += (0 - p.cursor.x) * waveConfig.TENSION_STRENGTH;
+                        p.cursor.vy += (0 - p.cursor.y) * waveConfig.TENSION_STRENGTH;
+                        p.cursor.vx *= waveConfig.FRICTION;
+                        p.cursor.vy *= waveConfig.FRICTION;
+                        p.cursor.x += p.cursor.vx * waveConfig.CURSOR_DISPLACEMENT_STRENGTH;
+                        p.cursor.y += p.cursor.vy * waveConfig.CURSOR_DISPLACEMENT_STRENGTH;
+                    });
+
+                    // Draw line
+                    this.ctx.moveTo(points[0].x + points[0].wave.x + points[0].cursor.x, points[0].y + points[0].wave.y + points[0].cursor.y);
+                    for (let i = 0; i < points.length - 1; i++) {
+                        const pCurrent = points[i];
+                        const pNext = points[i+1];
+                        const xc = (pCurrent.x + pCurrent.wave.x + pCurrent.cursor.x + pNext.x + pNext.wave.x + pNext.cursor.x) / 2;
+                        const yc = (pCurrent.y + pCurrent.wave.y + pCurrent.cursor.y + pNext.y + pNext.wave.y + pNext.cursor.y) / 2;
+                        this.ctx.quadraticCurveTo(pCurrent.x + pCurrent.wave.x + pCurrent.cursor.x, pCurrent.y + pCurrent.wave.y + pCurrent.cursor.y, xc, yc);
+                    }
+                });
+                this.ctx.stroke();
+                requestAnimationFrame(this.animate);
+            }
+        }
+
+        // Initialize Wave System
+        window.waveSystem = new WaveSystem('waves-canvas');
+
+        // --- 5. CTA & SWIPE PAGE TRANSITION LOGIC ---
+        const swipeOverlay = document.getElementById('swipe-overlay');
+        
+        // Check if returning from back button
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('back') === 'true') {
+            // Instantly cover screen, then swipe away to the right
+            swipeOverlay.classList.remove('transition-transform', 'duration-500');
+            swipeOverlay.classList.remove('translate-x-full');
+            swipeOverlay.classList.add('translate-x-0'); // Cover screen
+            
+            // Force reflow
+            void swipeOverlay.offsetWidth;
+            
+            // Re-apply transition and swipe away
+            swipeOverlay.classList.add('transition-transform', 'duration-500');
+            setTimeout(() => {
+                swipeOverlay.classList.replace('translate-x-0', 'translate-x-full');
+            }, 50);
+            
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+
+        const ctaBtn = document.getElementById('cta-btn');
+        ctaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Swipe overlay over the screen from the right
+            swipeOverlay.classList.remove('translate-x-full');
+            swipeOverlay.classList.add('translate-x-0');
+            
+            // Navigate after overlay fully covers (500ms)
+            setTimeout(() => {
+                window.location.href = 'contact.html';
+            }, 500); 
+        });
+
+    </script>
+</body>
+</html>
